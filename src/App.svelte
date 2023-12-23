@@ -1,47 +1,75 @@
 <script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import * as echarts from "echarts";
+  import { onMount, onDestroy } from "svelte";
+
+  import { Button } from "flowbite-svelte";
+
+  let myChart;
+  let chartContainer;
+
+  // Chart-Optionen definieren
+  let options = {
+    xAxis: {
+      type: "category",
+      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    },
+    yAxis: {
+      type: "value",
+    },
+    series: [
+      {
+        data: [150, 230, 224, 218, 135, 147, 260],
+        type: "line",
+      },
+    ],
+  };
+
+  // Funktion zum Aktualisieren des Diagramms
+  function updateChart(newOptions) {
+    options = newOptions;
+    myChart.setOption(options);
+  }
+
+  // Diagramm initialisieren und Optionen setzen
+  function initChart() {
+    myChart = echarts.init(chartContainer);
+    myChart.setOption(options);
+  }
+
+  // Diagramm bei Änderungen der Größe des Containers anpassen
+  function handleResize() {
+    if (myChart) {
+      myChart.resize();
+    }
+  }
+
+  // Diagramm initialisieren, wenn der Container bereit ist
+  onMount(() => {
+    initChart();
+    window.addEventListener("resize", handleResize);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener("resize", handleResize);
+    if (myChart) {
+      myChart.dispose();
+    }
+  });
 </script>
 
 <main>
-  <div>
-    <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
+  <div bind:this={chartContainer} style="width: 600px; height: 400px;"></div>
 
-  <div class="card">
-    <Counter />
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  <Button
+    on:click={() =>
+      updateChart({
+        ...options,
+        series: [
+          {
+            data: [160, 260, 260, 260, 160, 160, 290],
+            type: "line",
+          },
+        ],
+      })}>Change Chart</Button
+  >
 </main>
-
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>
