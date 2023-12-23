@@ -1,8 +1,14 @@
 <script>
   import * as echarts from "echarts";
+
   import { onMount, onDestroy } from "svelte";
 
   import { Button } from "flowbite-svelte";
+
+  import { writable } from "svelte/store";
+
+  // Initialisieren Sie das Array als Svelte Store
+  let chartData = writable([0, 1, 2, 3, 4, 5, 6]);
 
   let myChart;
   let chartContainer;
@@ -18,16 +24,22 @@
     },
     series: [
       {
-        data: [150, 230, 224, 218, 135, 147, 260],
+        data: [0, 1, 2, 3, 4, 5, 6],
         type: "line",
       },
     ],
   };
 
+  // Funktion zum Erhöhen aller Werte um 10
+  function increaseValues() {
+    chartData.update((n) => n.map((value) => value + 10));
+    console.log($chartData);
+    handleDataUpdate($chartData);
+  }
+
   // Funktion zum Aktualisieren des Diagramms
   function updateChart(newOptions) {
-    options = newOptions;
-    myChart.setOption(options);
+    myChart.setOption(newOptions);
   }
 
   // Diagramm initialisieren und Optionen setzen
@@ -41,6 +53,11 @@
     if (myChart) {
       myChart.resize();
     }
+  }
+
+  function handleDataUpdate(newData) {
+    // Diagramm mit neuen Daten aktualisieren
+    updateChart({ ...options, series: [{ data: newData }] });
   }
 
   // Diagramm initialisieren, wenn der Container bereit ist
@@ -58,18 +75,12 @@
 </script>
 
 <main>
-  <div bind:this={chartContainer} style="width: 600px; height: 400px;"></div>
+  <div class="grid">
+    <div bind:this={chartContainer} style="width: 600px; height: 400px;"></div>
 
-  <Button
-    on:click={() =>
-      updateChart({
-        ...options,
-        series: [
-          {
-            data: [160, 260, 260, 260, 160, 160, 290],
-            type: "line",
-          },
-        ],
-      })}>Change Chart</Button
-  >
+    <div class="grid grid-cols-2 gap-5">
+      <Button on:click={increaseValues}>Change Chart</Button>
+      <Button on:click={() => updateChart(options)}>Reset</Button>
+    </div>
+  </div>
 </main>
